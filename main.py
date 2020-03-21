@@ -156,8 +156,9 @@ def delete():
         return render_template('delete_success.html', ndel=ndel)
 
 @app.route('/map')
-def index():
-    return render_template('index.html')
+@app.route('/map/<plz>')
+def index(plz = '00000'):
+    return render_template('index.html', plz=plz)
 
 
 @app.route('/impressum')
