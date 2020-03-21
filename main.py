@@ -1,6 +1,6 @@
 import sys
 import random
-from flask import Flask, render_template, jsonify, redirect
+from flask import Flask, render_template, jsonify, redirect, url_for, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask import request, flash
 from flask_bootstrap import Bootstrap
@@ -9,10 +9,12 @@ import json
 from copy import deepcopy
 import firebase_admin
 import urllib
-import datetime
+from datetime import datetime, timedelta
 from firebase_admin import credentials, firestore
 from itsdangerous import URLSafeTimedSerializer, Signer
 from plz.plz2kreis import plz2kreis, plz2longlat
+
+from util import covertFirebaseTimeToPythonTime
 
 testing_mode = True
 
@@ -186,7 +188,7 @@ def index(plz='00000'):
         # foward to addiitional survey
         return redirect(url_for('report'))
     else:
-        # Show the user the map
+        # Show the user the map, if plz is given pan to it
         return render_template('index.html', plz=plz)
 
 
