@@ -155,10 +155,39 @@ def delete():
 
         return render_template('delete_success.html', ndel=ndel)
 
-@app.route('/map')
-@app.route('/map/<plz>')
-def index(plz = '00000'):
-    return render_template('index.html', plz=plz)
+
+@app.route('/<plz>')
+@app.route('/')
+def index(plz='00000'):
+
+    # read Cookie
+    signature = request.cookies.get('signature')
+
+    # if not exist
+    date_time_obj = None
+    if not signature:
+        # create & forward to mandatory questionaire
+        return redirect(url_for('report'))
+    else:
+        oldreports = report_ref.where("signature", '==', signature).stream()
+        timestamp = None
+        for oldreport in oldreports:
+            oldreport = oldreport.to_dict()
+            if timestamp is None or \
+                    timestamp < oldreport["timestamp"]:
+                timestamp = oldreport["timestamp"]
+        date_time_obj = covertFirebaseTimeToPythonTime(timestamp)
+        now = datetime.utcnow()
+
+
+    # if Update needed?
+    time_diff = timedelta(seconds=15)
+    if date_time_obj + time_diff < now:
+        # foward to addiitional survey
+        return redirect(url_for('report'))
+    else:
+        # Show the user the map
+        return render_template('index.html', plz=plz)
 
 
 @app.route('/impressum')
